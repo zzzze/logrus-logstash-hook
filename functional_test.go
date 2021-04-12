@@ -1,4 +1,4 @@
-package logrustash_test
+package logrustash
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,7 +18,7 @@ func TestEntryIsNotChangedByLogstashFormatter(t *testing.T) {
 	log := logrus.New()
 	log.Out = bufferOut
 
-	hook := logrustash.New(buffer, logrustash.DefaultFormatter(logrus.Fields{"NICKNAME": ""}))
+	hook := New(buffer, DefaultFormatter(logrus.Fields{"NICKNAME": ""}))
 	log.Hooks.Add(hook)
 
 	log.Info("hello world")
@@ -35,7 +34,7 @@ func TestEntryIsNotChangedByLogstashFormatter(t *testing.T) {
 func TestTimestampFormatKitchen(t *testing.T) {
 	log := logrus.New()
 	buffer := bytes.NewBufferString("")
-	hook := logrustash.New(buffer, logrustash.LogstashFormatter{
+	hook := New(buffer, LogstashFormatter{
 		Formatter: &logrus.JSONFormatter{
 			FieldMap: logrus.FieldMap{
 				logrus.FieldKeyTime: "@timestamp",
@@ -59,7 +58,7 @@ func TestTimestampFormatKitchen(t *testing.T) {
 func TestTextFormatLogstash(t *testing.T) {
 	log := logrus.New()
 	buffer := bytes.NewBufferString("")
-	hook := logrustash.New(buffer, logrustash.LogstashFormatter{
+	hook := New(buffer, LogstashFormatter{
 		Formatter: &logrus.TextFormatter{
 			TimestampFormat: time.Kitchen,
 		},
@@ -80,7 +79,7 @@ func TestTextFormatLogstash(t *testing.T) {
 func TestLogWithFieldsDoesNotOverrideHookFields(t *testing.T) {
 	log := logrus.New()
 	buffer := bytes.NewBufferString("")
-	hook := logrustash.New(buffer, logrustash.LogstashFormatter{
+	hook := New(buffer, LogstashFormatter{
 		Formatter: &logrus.JSONFormatter{},
 		Fields:    logrus.Fields{},
 	})
@@ -98,7 +97,7 @@ func TestLogWithFieldsDoesNotOverrideHookFields(t *testing.T) {
 }
 
 func TestDefaultFormatterNotOverrideMyLogstashFieldsValues(t *testing.T) {
-	formatter := logrustash.DefaultFormatter(logrus.Fields{"@version": "2", "type": "mylogs"})
+	formatter := DefaultFormatter(logrus.Fields{"@version": "2", "type": "mylogs"})
 
 	dataBytes, err := formatter.Format(&logrus.Entry{Data: logrus.Fields{}})
 	if err != nil {
@@ -118,7 +117,7 @@ func TestDefaultFormatterNotOverrideMyLogstashFieldsValues(t *testing.T) {
 }
 
 func TestDefaultFormatterLogstashFields(t *testing.T) {
-	formatter := logrustash.DefaultFormatter(logrus.Fields{})
+	formatter := DefaultFormatter(logrus.Fields{})
 
 	dataBytes, err := formatter.Format(&logrus.Entry{Data: logrus.Fields{}})
 	if err != nil {
@@ -146,7 +145,7 @@ func TestUDPWritter(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected Dial to not return error: %s", err)
 	}
-	hook := logrustash.New(conn, &logrus.JSONFormatter{})
+	hook := New(conn, &logrus.JSONFormatter{})
 	log.Hooks.Add(hook)
 
 	log.Info("this is an information message")

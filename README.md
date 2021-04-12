@@ -10,7 +10,7 @@ Use this hook to send the logs to [Logstash](https://www.elastic.co/products/log
 package main
 
 import (
-        "github.com/bshuster-repo/logrus-logstash-hook"
+        "github.com/zzzze/logrus-logstash-hook"
         "github.com/sirupsen/logrus"
         "net"
 )
@@ -47,11 +47,36 @@ This is how it will look like:
 }
 ```
 
-# Maintainers
+## with health check
 
-Name         | Github    | Twitter    |
------------- | --------- | ---------- |
-Boaz Shuster | ripcurld0 | @ripcurld0 |
+If connect is broken, it will try to reconnect. If reconnect fails, it can
+trigger a callback.
+
+```go
+package main
+
+import (
+        "github.com/zzzze/logrus-logstash-hook"
+        "github.com/sirupsen/logrus"
+        "net"
+)
+
+func main() {
+        log := logrus.New()
+        hook := logrustash.NewWithHealthCheck(
+          "tcp",
+          "logstash.mycompany.net:8911",
+          logrustash.SetDebug(false),
+          logrustash.SetRetryCount(100),
+        }),
+        log.Hooks.Add(hook)
+        ctx := log.WithFields(logrus.Fields{
+                "method": "main",
+        })
+        ctx.Info("Hello World!")
+}
+
+```
 
 # License
 
